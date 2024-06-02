@@ -2,39 +2,40 @@
 Mock requests for testing route
 """
 
-from typing import Any
+from typing import Any, Dict, Optional
 from unittest.mock import Mock
 
 
 def mock_response(
-    status_code: int, json_data: dict[str, Any], headers: dict[str, Any] = {}
+    status_code: int,
+    json_data: Optional[Dict[str, Any]] = None,
+    headers: Optional[Dict[str, Any]] = None,
 ) -> Mock:
     """
-    Create mock response for request with status code and json data
+    Create mock response for request with status code and json data.
 
     Args:
-        status_code (int): status code for mock response
-        json_data (dict[str, Any]): json content for mock response
-        headers (dict[str, Any], optional): header for the mock response. Defaults to {}.
+        status_code (int): Status code for mock response.
+        json_data (Optional[Dict[str, Any]]): JSON content for mock response.
+        headers (Optional[Dict[str, Any]]): Headers for the mock response. Defaults to None.
 
     Returns:
-        Mock: mock response for api
+        Mock: Mock response for API.
     """
 
     response = Mock()
     response.status_code = status_code
     response.json.return_value = json_data
-    response.headers = headers
+    response.headers = headers or {}
     return response
 
 
-def mock_verify_response(**kwargs) -> Mock:
+def mock_verify_response(**kwargs: Any) -> Mock:
     """
-    Mock response for /verify endpoint call
-
+    Mock response for /verify endpoint call.
 
     Returns:
-        Mock: mock response for api
+        Mock: Mock response for API.
     """
     if kwargs["method"] == "get":
         if "key" in kwargs.get("params", {}):
@@ -61,17 +62,19 @@ def mock_verify_response(**kwargs) -> Mock:
         return mock_response(200, {"message": "patch request processed"})
     elif kwargs["method"] == "delete":
         return mock_response(200, {"message": "delete request processed"})
+    else:
+        return mock_response(405, {"message": "method not allowed"})
 
 
-def mock_request_side_effect(url: str, **kwargs) -> Mock:
+def mock_request_side_effect(url: str, **kwargs: Any) -> Mock:
     """
-    Mock API response to test route
+    Mock API response to test route.
 
     Args:
-        url (str): api url
+        url (str): API URL.
 
     Returns:
-        Mock: mock response of the api
+        Mock: Mock response of the API.
     """
     if url.endswith("/verify"):
         return mock_verify_response(**kwargs)
