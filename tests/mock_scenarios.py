@@ -1,5 +1,3 @@
-
-
 from beaver_routes.core.scenario import BaseScenario
 
 

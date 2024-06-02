@@ -1,11 +1,14 @@
 """
 Mock requests for testing route
 """
+
 from typing import Any
 from unittest.mock import Mock
 
 
-def mock_response(status_code: int, json_data: dict[str, Any], headers: dict[str, Any] = {}) -> Mock:
+def mock_response(
+    status_code: int, json_data: dict[str, Any], headers: dict[str, Any] = {}
+) -> Mock:
     """
     Create mock response for request with status code and json data
 
@@ -42,10 +45,13 @@ def mock_verify_response(**kwargs) -> Mock:
         else:
             return mock_response(400, {"message": "missing parameter key"})
     elif kwargs["method"] == "options":
-        response_headers = {'Allow': 'OPTIONS, GET, HEAD, POST, PUT, PATCH', 'Content-Length': '0'}
+        response_headers = {
+            "Allow": "OPTIONS, GET, HEAD, POST, PUT, PATCH",
+            "Content-Length": "0",
+        }
         return mock_response(200, None, response_headers)
     elif kwargs["method"] == "head":
-        response_headers = {'Content-Type': 'application/json', 'Content-Length': '251'}
+        response_headers = {"Content-Type": "application/json", "Content-Length": "251"}
         return mock_response(200, None, response_headers)
     elif kwargs["method"] == "post":
         return mock_response(201, {"message": "post request processed"})

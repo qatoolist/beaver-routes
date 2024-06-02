@@ -2,21 +2,24 @@ from __future__ import annotations
 
 import inspect
 import logging
-from typing import Any
-from typing import Callable
+from typing import Any, Callable
 
 import requests
 
 from beaver_routes.core.attribute_dictionary import AttributeDictionary
-from beaver_routes.core.attribute_dictionary import AttributeDictionary
+from beaver_routes.core.base_mixin import BaseMixin
 from beaver_routes.core.config import Config
-from beaver_routes.core.constants import ALLOWED_COMMON_PARAMS, ALLOWED_METHOD_PARAMS, VALID_HOOK_SCENARIOS, VALID_MERGE_STRATEGIES
-
+from beaver_routes.core.constants import (
+    ALLOWED_COMMON_PARAMS,
+    ALLOWED_METHOD_PARAMS,
+    VALID_HOOK_SCENARIOS,
+    VALID_MERGE_STRATEGIES,
+)
 
 logger = logging.getLogger(__name__)
 
 
-class BaseRoute:
+class BaseRoute(BaseMixin):
     """
     Base class for defining API request routes
 
@@ -78,14 +81,7 @@ class BaseRoute:
     CONFIG: dict[Any, Any] = Config.CONFIG
 
     def __init__(self, endpoint: str = "") -> None:
-        self.scenario_method: Callable = None
-        self.scenario_groups: map[str, type] = None
-        self.endpoint: str = endpoint
-        self._after_hooks: dict[str, list[Callable]] = {}
-        self._request_args = None
-        self._response = None
-        self.current_scenario_group: str | None = None
-        self.current_scenario_name: str | None = None
+        super().__init__(endpoint)
 
     def __route__(self) -> dict[str, Any]:
         """
@@ -164,7 +160,9 @@ class BaseRoute:
 
         return scenario_group_instance
 
-    def _get_request_args(self, method: str, **kwargs: dict[str, Any]) -> dict[str, Any]:
+    def _get_request_args(
+        self, method: str, **kwargs: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Returns the processed request args
 
@@ -184,16 +182,24 @@ class BaseRoute:
 
         route_attribute = self._invoke_with_arg_dict_conditionally(self.__route__)
         method = self._get_request_method(method)
-        method_attribute = self._invoke_with_arg_dict_conditionally(method) if method else {}
+        method_attribute = (
+            self._invoke_with_arg_dict_conditionally(method) if method else {}
+        )
         scenario_attribute = (
-            self._invoke_with_arg_dict_conditionally(self.scenario_method) if self.scenario_method else {}
+            self._invoke_with_arg_dict_conditionally(self.scenario_method)
+            if self.scenario_method
+            else {}
         )
 
-        request_args = self._merge_request_args(route_attribute, method_attribute, scenario_attribute, kwargs)
+        request_args = self._merge_request_args(
+            route_attribute, method_attribute, scenario_attribute, kwargs
+        )
 
         return request_args
 
-    def _invoke_with_arg_dict_conditionally(self, route_method: Callable) -> AttributeDictionary | dict:
+    def _invoke_with_arg_dict_conditionally(
+        self, route_method: Callable
+    ) -> AttributeDictionary | dict:
         """
         Execute the given route method conditionally based on number of parameters it accepts
         passes argument dictionary instance as parameter if method accept one parameter
@@ -209,9 +215,7 @@ class BaseRoute:
         """
         method_parameters = inspect.signature(route_method).parameters.keys()
         if len(method_parameters) > 1:
-            error_message = (
-                f"method execution failed, '{route_method}' route method does not support more than 1 request argument"
-            )
+            error_message = f"method execution failed, '{route_method}' route method does not support more than 1 request argument"
             logger.error(error_message)
             raise TypeError(error_message)
 
@@ -241,11 +245,17 @@ class BaseRoute:
             for key, value in dictionary.items():
                 if isinstance(value, AttributeDictionary):
                     value = value.to_dict()
-                if key in merged_args and isinstance(merged_args[key], dict) and isinstance(value, dict):
+                if (
+                    key in merged_args
+                    and isinstance(merged_args[key], dict)
+                    and isinstance(value, dict)
+                ):
                     merge_strategy = value.pop("_merge_strategy", "deep_merge")
 
                     if merge_strategy == "deep_merge":
-                        merged_args[key] = self._merge_request_args(merged_args[key], value)
+                        merged_args[key] = self._merge_request_args(
+                            merged_args[key], value
+                        )
                     elif merge_strategy == "replace":
                         merged_args[key] = value
                     elif merge_strategy == "remove":
@@ -287,11 +297,15 @@ class BaseRoute:
 
         for hook in hooks:
             if not callable(hook):
-                error_message = f"Invalid after hook: '{hook}', 'after hook' should be a callable"
+                error_message = (
+                    f"Invalid after hook: '{hook}', 'after hook' should be a callable"
+                )
                 logger.error(error_message)
                 raise TypeError(error_message)
 
-        logger.debug(f"setting hooks: {hooks} for scope: {scope} for route: '{self.__class__.__name__}'")
+        logger.debug(
+            f"setting hooks: {hooks} for scope: {scope} for route: '{self.__class__.__name__}'"
+        )
         self._after_hooks[scope] = hooks
 
     def _execute_after_hooks(self):
@@ -326,7 +340,9 @@ class BaseRoute:
         else:
             logger.debug(f"method attribute for '{method}' not implemented in route")
 
-    def get_parsed_request_args(self, method: str, **kwargs: dict[str, Any]) -> dict[str, Any]:
+    def get_parsed_request_args(
+        self, method: str, **kwargs: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         merges and validate the request args and returns parsed request args
 
@@ -347,14 +363,18 @@ class BaseRoute:
         # create request url if not in request parameters
         if "url" not in request_args:
             if not self.endpoint:
-                error_message = "request args does not contain 'endpoint' to send request"
+                error_message = (
+                    "request args does not contain 'endpoint' to send request"
+                )
                 logger.error(error_message)
                 raise AttributeError(error_message)
             request_url = self.BASE_URL + self.endpoint
             request_args["url"] = request_url.format(**url_placeholders)
 
         # validate request parameters
-        allowed_request_params = ALLOWED_COMMON_PARAMS + ALLOWED_METHOD_PARAMS[method.upper()]
+        allowed_request_params = (
+            ALLOWED_COMMON_PARAMS + ALLOWED_METHOD_PARAMS[method.upper()]
+        )
         request_args_keys = request_args.keys()
         if set(request_args_keys).issubset(allowed_request_params):
             logger.debug("request args are valid")
@@ -366,7 +386,9 @@ class BaseRoute:
 
         return request_args
 
-    def _request(self, method: str, **kwargs: dict[str, Any]) -> requests.Response | None:
+    def _request(
+        self, method: str, **kwargs: dict[str, Any]
+    ) -> requests.Response | None:
         """
         Send the HTTP request after validating the request attributes
 
@@ -408,7 +430,9 @@ class BaseRoute:
         if validator and callable(validator):
             validator(*args, **kwargs)
         else:
-            raise NotImplementedError(f"Validation attribute '{validator_name}' not found in derived route")
+            raise NotImplementedError(
+                f"Validation attribute '{validator_name}' not found in derived route"
+            )
 
     def get(self, **kwargs: dict[str, Any]) -> requests.Response | None:
         """

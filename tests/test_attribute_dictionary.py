@@ -4,7 +4,6 @@ from beaver_routes.core.attribute_dictionary import AttributeDictionary
 
 
 class TestAttributeDictionary:
-
     def test_initialization(self) -> None:
         ad = AttributeDictionary()
         assert ad._data == {}
@@ -81,15 +80,7 @@ class TestAttributeDictionary:
         assert str(ad) == str(data)
 
     def test_deep_nested_structure(self) -> None:
-        data = {
-            "level1": {
-                "level2": {
-                    "level3": {
-                        "value": 42
-                    }
-                }
-            }
-        }
+        data = {"level1": {"level2": {"level3": {"value": 42}}}}
         ad = AttributeDictionary(data)
         assert ad.level1.level2.level3.value == 42
         assert ad.to_dict() == data
@@ -103,30 +94,16 @@ class TestAttributeDictionary:
         assert ad.level1.level2.new_value == "test"
 
         expected_dict = {
-            "level1": {
-                "level2": {
-                    "level3": {
-                        "value": 42
-                    },
-                    "new_value": "test"
-                }
-            }
+            "level1": {"level2": {"level3": {"value": 42}, "new_value": "test"}}
         }
         assert ad.to_dict() == expected_dict
 
     def test_complex_structure(self) -> None:
         data = {
             "a": 1,
-            "b": {
-                "x": 10,
-                "y": {
-                    "nested": {
-                        "value": 42
-                    }
-                }
-            },
+            "b": {"x": 10, "y": {"nested": {"value": 42}}},
             "c": [1, 2, 3],
-            "d": {"e": {"f": {"g": "value"}}}
+            "d": {"e": {"f": {"g": "value"}}},
         }
         ad = AttributeDictionary(data)
         assert ad.b.y.nested.value == 42

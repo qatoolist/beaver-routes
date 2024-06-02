@@ -1,11 +1,11 @@
 from unittest import mock
-from unittest.mock import Mock
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 
 from tests.mock.mock_requests import mock_request_side_effect
 from tests.mock_routes import VerifyRoute
+
 
 class TestRouteHooks:
     @pytest.fixture

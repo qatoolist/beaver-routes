@@ -17,7 +17,9 @@ class TestBaseScenario:
     def test_route_setter(self, route):
         base_scenario = BaseScenario()
         base_scenario.route = route
-        assert base_scenario._route == route, "scenario route does not match with setter"
+        assert (
+            base_scenario._route == route
+        ), "scenario route does not match with setter"
 
     def test_route_setter_invalid(self):
         base_scenario = BaseScenario()

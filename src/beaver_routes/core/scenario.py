@@ -2,7 +2,6 @@ import logging
 
 from beaver_routes.core.route import Route
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -21,6 +20,7 @@ class BaseScenario:
             logger.error(error_message)
             raise ValueError(error_message)
         self._route = route
+
 
 class Scenario(BaseScenario):
     pass

@@ -37,7 +37,9 @@ class AttributeDictionary:
                 raise AttributeError(
                     "dictionary conversion not supported for AttributeDictionary with keys 'items' or 'keys'"
                 )
-            result[key] = value.to_dict() if isinstance(value, AttributeDictionary) else value
+            result[key] = (
+                value.to_dict() if isinstance(value, AttributeDictionary) else value
+            )
         return result
 
     def __repr__(self) -> str:
