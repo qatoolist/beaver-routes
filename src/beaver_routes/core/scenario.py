@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from beaver_routes.core.route import Route
 
@@ -9,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class BaseScenario:
     def __init__(self) -> None:
-        self._route: Optional[Route] = None
+        self._route: Route | None = None
 
     @property
     def route(self) -> Route | None:

@@ -1,3 +1,165 @@
+Directory Structure -
+```
+├── beaver-routes/
+│   ├── .isort.cfg
+│   ├── pytest.ini
+│   ├── .pre-commit-config.yaml
+│   ├── mypy.ini
+│   ├── requirements-dev.txt
+│   ├── .env
+│   ├── .devcontainer/
+│   │   ├── Dockerfile
+│   │   ├── devcontainer.json
+│   ├── src/
+│   │   ├── beaver_routes/
+│   │   │   ├── __init__.py
+│   │   │   ├── __about__.py
+│   │   │   ├── core/
+│   │   │   │   ├── route.py
+│   │   │   │   ├── scenario.py
+│   │   │   │   ├── attribute_dictionary.py
+```
+
+...beaver-routes/.isort.cfg
+```
+[settings]
+profile = black
+line_length = 88
+known_third_party = requests,aiohttp  # Example for third-party libraries
+
+```
+
+...beaver-routes/pytest.ini
+```
+[pytest]
+testpaths = tests
+pythonpath = src
+
+```
+
+...beaver-routes/.pre-commit-config.yaml
+```
+repos:
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.10.0
+    hooks:
+      - id: mypy
+        args: [--install-types, --non-interactive, --config-file=./mypy.ini, --exclude, ^tests/]
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.4.7
+    hooks:
+      - id: ruff
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+
+  - repo: https://github.com/pre-commit/mirrors-isort
+    rev: v5.10.1
+    hooks:
+      - id: isort
+
+```
+
+...beaver-routes/mypy.ini
+```
+[mypy]
+python_version = 3.10
+strict = True
+files = src/
+
+[mypy-pytest]
+ignore_missing_imports = True
+
+[mypy-aiohttp]
+ignore_missing_imports = True
+
+[mypy-aiohttp.client_exceptions]
+ignore_missing_imports = True
+
+[mypy-tenacity]
+ignore_missing_imports = True
+
+```
+
+...beaver-routes/requirements-dev.txt
+```
+pytest
+pytest-cov
+mypy
+flake8
+black
+requests
+aiohttp
+tenacity
+
+```
+
+...beaver-routes/.env
+```
+PYTHONPATH=src
+
+```
+
+...beaver-routes/.devcontainer/Dockerfile
+```
+# Base image
+FROM mcr.microsoft.com/devcontainers/python:3.11-bookworm
+
+# Install additional tools
+RUN pip install --upgrade pip
+
+# Set the user to vscode
+USER vscode
+
+# Set the working directory
+WORKDIR /workspace
+
+```
+
+...beaver-routes/.devcontainer/devcontainer.json
+```
+{
+    "name": "Beaver Routes Dev Container",
+    "dockerFile": "Dockerfile",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.shell.linux": "/bin/bash"
+            },
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-azuretools.vscode-docker",
+                "esbenp.prettier-vscode"
+            ]
+        }
+    },
+    "forwardPorts": [],
+    "postCreateCommand": "pip install --upgrade pip && pip install -r requirements-dev.txt",
+    "remoteUser": "vscode"
+}
+
+```
+
+...beaver-routes/src/beaver_routes/__init__.py
+```
+<EMPTY_FILE>
+```
+
+...beaver-routes/src/beaver_routes/__about__.py
+```
+__version__ = "0.0.1"
+
+```
+
+...beaver-routes/src/beaver_routes/core/route.py
+```
 from __future__ import annotations
 
 import inspect
@@ -8,10 +170,43 @@ from typing import Callable
 import requests
 
 from beaver_routes.core.attribute_dictionary import AttributeDictionary
-from beaver_routes.core.attribute_dictionary import AttributeDictionary
-from beaver_routes.core.config import Config
-from beaver_routes.core.constants import ALLOWED_COMMON_PARAMS, ALLOWED_METHOD_PARAMS, VALID_HOOK_SCENARIOS, VALID_MERGE_STRATEGIES
 
+# List of allowed common parameters for api requests
+ALLOWED_COMMON_PARAMS: list[str] = [
+    "url",
+    "headers",
+    "cookies",
+    "auth",
+    "timeout",
+    "allow_redirects",
+    "proxies",
+    "verify",
+    "stream",
+    "cert",
+]
+
+# Allowed method parameters for each rest method
+ALLOWED_METHOD_PARAMS: dict[str, list[str]] = {
+    "GET": ["params"],
+    "POST": ["data", "json", "files"],
+    "PUT": ["data", "json", "files"],
+    "DELETE": [],
+    "PATCH": ["data", "json", "files"],
+    "OPTIONS": ["params"],
+    "HEAD": ["params"],
+}
+
+VALID_HOOK_SCENARIOS: list[str] = [
+    "route",
+    "method",
+    "scenario",
+]
+
+VALID_MERGE_STRATEGIES: list[str] = [
+    "deep_merge",
+    "replace",
+    "remove",
+]
 
 logger = logging.getLogger(__name__)
 
@@ -74,8 +269,8 @@ class BaseRoute:
     ```
     """
 
-    BASE_URL: str = Config.BASE_URL  # Base API URL, should be read from config
-    CONFIG: dict[Any, Any] = Config.CONFIG
+    BASE_URL: str = ""  # Base API URL, should be read from config
+    CONFIG = dict()
 
     def __init__(self, endpoint: str = "") -> None:
         self.scenario_method: Callable = None
@@ -509,3 +704,87 @@ class BaseRoute:
 
 class Route(BaseRoute):
     pass
+
+```
+
+...beaver-routes/src/beaver_routes/core/scenario.py
+```
+import logging
+
+from beaver_routes.core.route import Route
+
+
+logger = logging.getLogger(__name__)
+
+
+class BaseScenario:
+    def __init__(self) -> None:
+        self._route: Route | None = None
+
+    @property
+    def route(self) -> Route | None:
+        return self._route
+
+    @route.setter
+    def route(self, route: Route) -> None:
+        if not isinstance(route, Route):
+            error_message = f"route should be of type 'Route', not '{type(route)}'"
+            logger.error(error_message)
+            raise ValueError(error_message)
+        self._route = route
+
+class Scenario(BaseScenario):
+    pass
+```
+
+...beaver-routes/src/beaver_routes/core/attribute_dictionary.py
+```
+from __future__ import annotations
+
+from typing import Any
+
+
+class AttributeDictionary:
+    def __init__(self, data: dict[Any, Any] | None = None):
+        self.__dict__["_data"] = {}
+        if data:
+            for name, value in data.items():
+                self._data[name] = self._wrap(value)
+
+    def __getattr__(self, name: str) -> Any:
+        if name not in self._data:
+            self._data[name] = AttributeDictionary()
+        return self._data[name]
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        self._data[name] = self._wrap(value)
+
+    def __getitem__(self, key: str) -> Any:
+        return self._data[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self._data[key] = self._wrap(value)
+
+    def __contains__(self, key: str) -> bool:
+        return key in self._data
+
+    def _wrap(self, value: Any) -> Any:
+        return AttributeDictionary(value) if isinstance(value, dict) else value
+
+    def to_dict(self) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in self._data.items():
+            if key in {"items", "keys"}:
+                raise AttributeError(
+                    "dictionary conversion not supported for AttributeDictionary with keys 'items' or 'keys'"
+                )
+            result[key] = value.to_dict() if isinstance(value, AttributeDictionary) else value
+        return result
+
+    def __repr__(self) -> str:
+        return repr(self._data)
+
+    def __str__(self) -> str:
+        return str(self._data)
+
+```
