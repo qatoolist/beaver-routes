@@ -1,15 +1,16 @@
 from __future__ import annotations
+
 from typing import Any
 
 
 class AttributeDictionary:
     def __init__(self, data: dict[Any, Any] | None = None):
-        self.__dict__['_data'] = {}
+        self.__dict__["_data"] = {}
         if data:
             for name, value in data.items():
                 self._data[name] = self._wrap(value)
 
-    def __getattr__(self, name: str) -> AttributeDictionary | Any:
+    def __getattr__(self, name: str) -> Any:
         if name not in self._data:
             self._data[name] = AttributeDictionary()
         return self._data[name]
@@ -26,7 +27,7 @@ class AttributeDictionary:
     def __contains__(self, key: str) -> bool:
         return key in self._data
 
-    def _wrap(self, value: Any) -> AttributeDictionary | Any:
+    def _wrap(self, value: Any) -> Any:
         return AttributeDictionary(value) if isinstance(value, dict) else value
 
     def to_dict(self) -> dict[str, Any]:
