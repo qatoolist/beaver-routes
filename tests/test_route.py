@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any
 
 import httpx
@@ -56,8 +58,8 @@ class CustomRoute(BaseRoute):
 
 
 # Helper function to mock httpx.Client and httpx.AsyncClient
-@pytest.fixture
-def mock_httpx_client(monkeypatch) -> None:  # type: ignore
+@pytest.fixture  # type: ignore
+def mock_httpx_client(monkeypatch) -> None:
     class MockResponse:
         def __init__(self, status_code: int = 200, json_data: Any = None) -> None:
             self.status_code = status_code
@@ -66,12 +68,12 @@ def mock_httpx_client(monkeypatch) -> None:  # type: ignore
         def json(self) -> Any:
             return self._json_data
 
-    async def mock_async_request(
+    async def mock_async_request(  # type: ignore
         self, method: str, url: str, **kwargs: Any
     ) -> MockResponse:
         return MockResponse()
 
-    def mock_request(self, method: str, url: str, **kwargs: Any) -> MockResponse:
+    def mock_request(self, method: str, url: str, **kwargs: Any) -> MockResponse:  # type: ignore
         return MockResponse()
 
     monkeypatch.setattr(httpx.AsyncClient, "request", mock_async_request)
@@ -81,14 +83,14 @@ def mock_httpx_client(monkeypatch) -> None:  # type: ignore
 # Test suite
 @pytest.mark.usefixtures("mock_httpx_client")
 class TestBaseRoute:
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio  # type: ignore
     async def test_route_initialization(self) -> None:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         assert route.endpoint == "https://jsonplaceholder.typicode.com/posts/1"
         assert isinstance(route.meta, Meta)
         assert isinstance(route.hooks, Hook)
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio  # type: ignore
     async def test_route_hooks(self) -> None:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = await route.get()
@@ -98,7 +100,7 @@ class TestBaseRoute:
         assert route.meta.params.get_param == "get_value"
         assert route.meta.params.method_hook == "method_hook_value"
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio  # type: ignore
     async def test_scenario_hooks(self) -> None:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = await route.for_scenario("scenario1").async_get()
@@ -110,21 +112,21 @@ class TestBaseRoute:
         assert route.meta.params.scenario_param == "scenario_value"
         assert route.meta.params.scenario_hook == "scenario_hook_value"
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio  # type: ignore
     async def test_invalid_hook_event(self) -> None:
         with pytest.raises(ValueError):
             route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
             route.hooks.add("invalid_event", lambda x: x)
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio  # type: ignore
     async def test_no_scenario_func(self) -> None:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         with pytest.raises(AttributeError):
             await route.for_scenario("non_existent_scenario").async_get()
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio  # type: ignore
     async def test_meta_exception(self, monkeypatch) -> None:
-        def mock_to_httpx_args_raise(meta, method) -> None:
+        def mock_to_httpx_args_raise(meta: Meta, method: str) -> None:
             raise MetaError("Meta Exception")
 
         monkeypatch.setattr(Meta, "to_httpx_args", mock_to_httpx_args_raise)
@@ -133,49 +135,49 @@ class TestBaseRoute:
         with pytest.raises(RuntimeError, match="Failed to prepare httpx arguments"):
             await route.async_get()
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio  # type: ignore
     async def test_sync_get(self) -> None:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = route.get()
         assert response.status_code == 200
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio  # type: ignore
     async def test_sync_post(self) -> None:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = route.post()
         assert response.status_code == 200
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio  # type: ignore
     async def test_sync_put(self) -> None:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = route.put()
         assert response.status_code == 200
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio  # type: ignore
     async def test_sync_delete(self) -> None:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = route.delete()
         assert response.status_code == 200
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio  # type: ignore
     async def test_async_get(self) -> None:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = await route.async_get()
         assert response.status_code == 200
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio  # type: ignore
     async def test_async_post(self) -> None:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = await route.async_post()
         assert response.status_code == 200
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio  # type: ignore
     async def test_async_put(self) -> None:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = await route.async_put()
         assert response.status_code == 200
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio  # type: ignore
     async def test_async_delete(self) -> None:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = await route.async_delete()
