@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import copy
-from typing import Any, Dict, Union
+from typing import Any, Dict, Union, cast
 
 from box import Box
 
@@ -21,7 +21,7 @@ from beaver_routes.exceptions.exceptions import (
     InvalidAdditionError,
     InvalidHttpMethodError,
     InvalidHttpxArgumentsError,
-    MetaException,
+    MetaError,
 )
 
 
@@ -89,9 +89,9 @@ class Meta:
         except InvalidHttpMethodError as e:
             raise InvalidHttpxArgumentsError(f"Failed to convert to httpx args: {e}")
         except Exception as e:
-            raise MetaException(f"Failed to convert to httpx args: {e}")
+            raise MetaError(f"Failed to convert to httpx args: {e}")
 
-    def __add__(self, other):
+    def __add__(self, other: Meta) -> Meta:
         if not isinstance(other, Meta):
             raise InvalidAdditionError("Cannot add non-Meta instance.")
 
@@ -118,7 +118,7 @@ class Meta:
         return self._dict_to_str(self.to_dict(), indent=4)
 
     def to_dict(self) -> Dict[str, Any]:
-        return self._attributes.to_dict()
+        return cast(dict[str, Any], self._attributes.to_dict())
 
     def copy(self) -> Meta:
         copied_meta = Meta()
@@ -127,7 +127,7 @@ class Meta:
 
     @staticmethod
     def _dict_to_str(data: Dict[str, Any], indent: int = 0) -> str:
-        def custom_repr(value):
+        def custom_repr(value: Any | None) -> str | None:
             if value is None:
                 return "None"
             elif isinstance(value, dict):
