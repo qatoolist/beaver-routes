@@ -1,13 +1,29 @@
 from __future__ import annotations
-from typing import Any, Dict, Union
+
 import copy
+from typing import Any, Dict, Union
+
 from box import Box
 
-from beaver_routes.core.httpx_args_handler import HttpxArgsHandler
 from beaver_routes._types._types import (
-    QueryParams, Headers, Cookies, Auth, Timeout, ContentType, DataType, FilesType
+    Auth,
+    ContentType,
+    Cookies,
+    DataType,
+    FilesType,
+    Headers,
+    QueryParams,
+    Timeout,
 )
-from beaver_routes.exceptions.exceptions import InvalidHttpMethodError, InvalidHttpxArgumentsError, MetaException, AttributeNotFoundError, InvalidAdditionError
+from beaver_routes.core.httpx_args_handler import HttpxArgsHandler
+from beaver_routes.exceptions.exceptions import (
+    AttributeNotFoundError,
+    InvalidAdditionError,
+    InvalidHttpMethodError,
+    InvalidHttpxArgumentsError,
+    MetaException,
+)
+
 
 class Meta:
     def __init__(
@@ -26,17 +42,31 @@ class Meta:
         json: Any = None,
     ):
         self._attributes = Box(default_box=True)
-        self._attributes.params = self._wrap(params) if params is not None else Box(default_box=True)
-        self._attributes.headers = self._wrap(headers) if headers is not None else Box(default_box=True)
-        self._attributes.cookies = self._wrap(cookies) if cookies is not None else Box(default_box=True)
+        self._attributes.params = (
+            self._wrap(params) if params is not None else Box(default_box=True)
+        )
+        self._attributes.headers = (
+            self._wrap(headers) if headers is not None else Box(default_box=True)
+        )
+        self._attributes.cookies = (
+            self._wrap(cookies) if cookies is not None else Box(default_box=True)
+        )
         self._attributes.auth = auth
         self._attributes.follow_redirects = follow_redirects
         self._attributes.timeout = timeout
         self._attributes.extensions = self._wrap(extensions)
-        self._attributes.content = content if content is not None else Box(default_box=True)
-        self._attributes.data = self._wrap(data) if data is not None else Box(default_box=True)
-        self._attributes.files = self._wrap(files) if files is not None else Box(default_box=True)
-        self._attributes.json = self._wrap(json) if json is not None else Box(default_box=True)
+        self._attributes.content = (
+            content if content is not None else Box(default_box=True)
+        )
+        self._attributes.data = (
+            self._wrap(data) if data is not None else Box(default_box=True)
+        )
+        self._attributes.files = (
+            self._wrap(files) if files is not None else Box(default_box=True)
+        )
+        self._attributes.json = (
+            self._wrap(json) if json is not None else Box(default_box=True)
+        )
 
     def _wrap(self, value: Any) -> Any:
         return Box(value, default_box=True) if isinstance(value, dict) else value
@@ -70,13 +100,19 @@ class Meta:
             if isinstance(value, Box) and isinstance(other._attributes[key], Box):
                 result._attributes[key] = value + other._attributes[key]
             else:
-                result._attributes[key] = other._attributes[key] if other._attributes[key] is not None else value
+                result._attributes[key] = (
+                    other._attributes[key]
+                    if other._attributes[key] is not None
+                    else value
+                )
         return result
 
     def __repr__(self) -> str:
-        return f"Meta(params={self._attributes.params}, headers={self._attributes.headers}, cookies={self._attributes.cookies}, auth={self._attributes.auth}, " \
-               f"follow_redirects={self._attributes.follow_redirects}, timeout={self._attributes.timeout}, extensions={self._attributes.extensions}, " \
-               f"content={self._attributes.content}, data={self._attributes.data}, files={self._attributes.files}, json={self._attributes.json})"
+        return (
+            f"Meta(params={self._attributes.params}, headers={self._attributes.headers}, cookies={self._attributes.cookies}, auth={self._attributes.auth}, "
+            f"follow_redirects={self._attributes.follow_redirects}, timeout={self._attributes.timeout}, extensions={self._attributes.extensions}, "
+            f"content={self._attributes.content}, data={self._attributes.data}, files={self._attributes.files}, json={self._attributes.json})"
+        )
 
     def __str__(self) -> str:
         return self._dict_to_str(self.to_dict(), indent=4)
@@ -93,13 +129,13 @@ class Meta:
     def _dict_to_str(data: Dict[str, Any], indent: int = 0) -> str:
         def custom_repr(value):
             if value is None:
-                return 'None'
+                return "None"
             elif isinstance(value, dict):
                 return Meta._dict_to_str(value, indent=indent + 4)
             return repr(value)
-        
+
         items = []
         for key, value in data.items():
             items.append(f'{" " * indent}"{key}": {custom_repr(value)}')
-        
+
         return "{\n" + ",\n".join(items) + "\n" + " " * indent + "}"

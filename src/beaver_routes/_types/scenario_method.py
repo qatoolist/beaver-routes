@@ -1,4 +1,5 @@
 from typing import Any, Callable, Optional
+
 from beaver_routes._types.method import Method
 
 

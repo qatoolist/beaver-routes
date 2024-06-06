@@ -85,5 +85,33 @@ def test_invalid_httpx_arguments():
     with pytest.raises(InvalidHttpxArgumentsError):
         meta.to_httpx_args("INVALID_METHOD")
 
+def test_remove_key():
+    meta = Meta()
+    meta.json = {
+        'a': {
+            'b': {
+                'c': 'd',
+                'e': 'f'
+            },
+            'x': 'y',
+            'z': 'z'
+        }
+    }
+
+    # Remove the 'x': 'y' key-value pair
+    del meta.json.a.x
+    
+    meta.json.a.x='wow'
+
+    meta.json.a+meta.json.a.x
+    del meta.json.a.x
+
+    # Verify the key-value pair has been removed
+    assert 'x' not in meta.json.a
+    assert meta.json.a.z == 'z'
+    assert meta.json.a.b.c == 'd'
+    assert meta.json.a.b.e == 'f'
+
 if __name__ == '__main__':
     pytest.main()
+

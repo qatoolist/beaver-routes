@@ -1,6 +1,6 @@
 from typing import Any, Callable
-from beaver_routes._types.method import Method
 
+from beaver_routes._types.method import Method
 
 class Hooks(dict[str, list[Method]]):
     def __init__(self, *args, **kwargs):

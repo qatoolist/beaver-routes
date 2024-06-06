@@ -1,7 +1,6 @@
 # Type aliases
 from typing import Any, Dict, Union
 
-
 QueryParams = Union[Dict[str, str], None]
 Headers = Union[Dict[str, str], None]
 Cookies = Union[Dict[str, str], None]

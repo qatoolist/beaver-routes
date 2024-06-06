@@ -1,6 +1,12 @@
 from typing import Any, Dict
+
 from box import Box
-from beaver_routes.exceptions.exceptions import InvalidHttpMethodError, InvalidHttpxArgumentsError
+
+from beaver_routes.exceptions.exceptions import (
+    InvalidHttpMethodError,
+    InvalidHttpxArgumentsError,
+)
+
 
 class HttpxArgsHandler:
     @staticmethod
@@ -18,22 +24,52 @@ class HttpxArgsHandler:
             args = {
                 "method": method,
                 "url": meta.url,
-                "params": empty_to_none(meta._attributes.params.to_dict() if meta._attributes.params else None),
-                "headers": empty_to_none(meta._attributes.headers.to_dict() if meta._attributes.headers else None),
-                "cookies": empty_to_none(meta._attributes.cookies.to_dict() if meta._attributes.cookies else None),
+                "params": empty_to_none(
+                    meta._attributes.params.to_dict()
+                    if meta._attributes.params
+                    else None
+                ),
+                "headers": empty_to_none(
+                    meta._attributes.headers.to_dict()
+                    if meta._attributes.headers
+                    else None
+                ),
+                "cookies": empty_to_none(
+                    meta._attributes.cookies.to_dict()
+                    if meta._attributes.cookies
+                    else None
+                ),
                 "auth": meta._attributes.auth,
                 "follow_redirects": meta._attributes.follow_redirects,
                 "timeout": meta._attributes.timeout,
-                "extensions": empty_to_none(meta._attributes.extensions.to_dict() if meta._attributes.extensions else None),
+                "extensions": empty_to_none(
+                    meta._attributes.extensions.to_dict()
+                    if meta._attributes.extensions
+                    else None
+                ),
             }
 
             if method in {"POST", "PUT", "PATCH"}:
-                args.update({
-                    "content": meta._attributes.content,
-                    "data": empty_to_none(meta._attributes.data.to_dict() if isinstance(meta._attributes.data, Box) else meta._attributes.data),
-                    "files": empty_to_none(meta._attributes.files.to_dict() if isinstance(meta._attributes.files, Box) else meta._attributes.files),
-                    "json": empty_to_none(meta._attributes.json.to_dict() if isinstance(meta._attributes.json, Box) else meta._attributes.json),
-                })
+                args.update(
+                    {
+                        "content": meta._attributes.content,
+                        "data": empty_to_none(
+                            meta._attributes.data.to_dict()
+                            if isinstance(meta._attributes.data, Box)
+                            else meta._attributes.data
+                        ),
+                        "files": empty_to_none(
+                            meta._attributes.files.to_dict()
+                            if isinstance(meta._attributes.files, Box)
+                            else meta._attributes.files
+                        ),
+                        "json": empty_to_none(
+                            meta._attributes.json.to_dict()
+                            if isinstance(meta._attributes.json, Box)
+                            else meta._attributes.json
+                        ),
+                    }
+                )
 
             # Remove keys with None values
             return {k: v for k, v in args.items() if v is not None}
