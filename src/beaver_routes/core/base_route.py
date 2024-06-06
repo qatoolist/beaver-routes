@@ -1,45 +1,49 @@
-from typing import Any, Optional, Callable
+from typing import Any
+
 import httpx
-from box import Box
+
 from beaver_routes.core.hook import Hook
 from beaver_routes.core.meta import Meta
 
-class BaseRoute:
-    def __init__(self, endpoint: str = ''):
-        self.endpoint = endpoint
-        self.meta = Meta()
-        self.hooks = Hook()
-        self.scenario = None
 
-    def __route__(self, meta: Meta, hooks: Hook):
+class BaseRoute:
+    def __init__(self, endpoint: str = ""):
+        self.endpoint: str = endpoint
+        self.meta: Meta = Meta()
+        self.hooks: Hook = Hook()
+        self.scenario: str | None = None
+
+    def __route__(self, meta: Meta, hooks: Hook) -> None:
         """Customize this method for route-specific meta and hooks."""
         pass
 
-    def __get__(self, meta: Meta, hooks: Hook):
+    def __get__(self, meta: Meta, hooks: Hook) -> None:
         """Customize this method for GET-specific meta and hooks."""
         pass
 
-    def __post__(self, meta: Meta, hooks: Hook):
+    def __post__(self, meta: Meta, hooks: Hook) -> None:
         """Customize this method for POST-specific meta and hooks."""
         pass
 
-    def __put__(self, meta: Meta, hooks: Hook):
+    def __put__(self, meta: Meta, hooks: Hook) -> None:
         """Customize this method for PUT-specific meta and hooks."""
         pass
 
-    def __delete__(self, meta: Meta, hooks: Hook):
+    def __delete__(self, meta: Meta, hooks: Hook) -> None:
         """Customize this method for DELETE-specific meta and hooks."""
         pass
 
-    def for_scenario(self, scenario_name: str) -> 'BaseRoute':
+    def for_scenario(self, scenario_name: str) -> "BaseRoute":
         self.scenario = scenario_name
         return self
 
-    def _request(self, method: str, url: str, **kwargs) -> httpx.Response:
+    def _request(self, method: str, url: str, **kwargs: Any) -> httpx.Response:
         with httpx.Client() as client:
             return client.request(method, url, **kwargs)
 
-    async def _async_request(self, method: str, url: str, **kwargs) -> httpx.Response:
+    async def _async_request(
+        self, method: str, url: str, **kwargs: Any
+    ) -> httpx.Response:
         async with httpx.AsyncClient() as client:
             return await client.request(method, url, **kwargs)
 
@@ -74,7 +78,7 @@ class BaseRoute:
             final_meta = scenario_meta
             final_hooks = scenario_hooks
 
-        final_hooks.apply_hooks('request', method, self.endpoint, final_meta)
+        final_hooks.apply_hooks("request", method, self.endpoint, final_meta)
 
         url = self.endpoint
 
@@ -85,7 +89,7 @@ class BaseRoute:
 
         response = self._request(method, url, **httpx_args)
 
-        final_hooks.apply_hooks('response', response)
+        final_hooks.apply_hooks("response", response)
 
         return response
 
@@ -120,7 +124,7 @@ class BaseRoute:
             final_meta = scenario_meta
             final_hooks = scenario_hooks
 
-        final_hooks.apply_hooks('request', method, self.endpoint, final_meta)
+        final_hooks.apply_hooks("request", method, self.endpoint, final_meta)
 
         url = self.endpoint
 
@@ -131,7 +135,7 @@ class BaseRoute:
 
         response = await self._async_request(method, url, **httpx_args)
 
-        final_hooks.apply_hooks('response', response)
+        final_hooks.apply_hooks("response", response)
 
         return response
 
