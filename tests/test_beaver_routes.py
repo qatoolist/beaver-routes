@@ -142,7 +142,7 @@ async def test_get_users() -> None:
     route = GetUsersRoute()
     response = await route.async_get()
     assert response.status_code == HTTPStatus.OK
-    assert "data" in response.json()
+    assert "data" in response.json_content
 
 
 @pytest.mark.asyncio  # type: ignore
@@ -158,7 +158,7 @@ async def test_create_user() -> None:
     route = CreateUserRoute()
     response = await route.async_post()
     assert response.status_code == HTTPStatus.CREATED
-    json_response = response.json()
+    json_response = response.json_content
     assert "id" in json_response
     assert "createdAt" in json_response
 
@@ -176,7 +176,7 @@ async def test_update_user() -> None:
     route = UpdateUserRoute(user_id=2)
     response = await route.async_put()
     assert response.status_code == HTTPStatus.OK
-    json_response = response.json()
+    json_response = response.json_content
     assert "updatedAt" in json_response
 
 
@@ -206,7 +206,7 @@ def test_sync_get_users() -> None:
     route = GetUsersRoute()
     response = route.get()
     assert response.status_code == HTTPStatus.OK
-    assert "data" in response.json()
+    assert "data" in response.json_content
 
 
 def test_sync_create_user() -> None:
@@ -221,7 +221,7 @@ def test_sync_create_user() -> None:
     route = CreateUserRoute()
     response = route.post()
     assert response.status_code == HTTPStatus.CREATED
-    json_response = response.json()
+    json_response = response.json_content
     assert "id" in json_response
     assert "createdAt" in json_response
 
@@ -238,7 +238,7 @@ def test_sync_update_user() -> None:
     route = UpdateUserRoute(user_id=2)
     response = route.put()
     assert response.status_code == HTTPStatus.OK
-    json_response = response.json()
+    json_response = response.json_content
     assert "updatedAt" in json_response
 
 

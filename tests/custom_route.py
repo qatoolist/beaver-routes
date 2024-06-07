@@ -1,8 +1,7 @@
-import httpx
-
 from beaver_routes.core.base_route import BaseRoute
 from beaver_routes.core.hook import Hook
 from beaver_routes.core.meta import Meta
+from beaver_routes.core.response import Response
 
 
 class CustomRoute(BaseRoute):
@@ -203,35 +202,35 @@ class CustomRoute(BaseRoute):
         print(f"Scenario request hook: {method} {url} {meta}")
         meta.params.scenario_hook = "scenario_hook_value"
 
-    def route_response_hook(self, response: httpx.Response) -> None:
+    def route_response_hook(self, response: Response) -> None:
         """Example route response hook.
 
         Args:
-            response (httpx.Response): The HTTP response.
+            response (Response): The HTTP response.
 
         Example:
-            >>> route_response_hook(httpx.Response(status_code=HTTPStatus.OK))
+            >>> route_response_hook(Response(status_code=HTTPStatus.OK))
         """
         print(f"Route response hook: {response.status_code}")
 
-    def method_response_hook(self, response: httpx.Response) -> None:
+    def method_response_hook(self, response: Response) -> None:
         """Example method response hook.
 
         Args:
-            response (httpx.Response): The HTTP response.
+            response (Response): The HTTP response.
 
         Example:
-            >>> method_response_hook(httpx.Response(status_code=HTTPStatus.OK))
+            >>> method_response_hook(Response(status_code=HTTPStatus.OK))
         """
         print(f"Method response hook: {response.status_code}")
 
-    def scenario_response_hook(self, response: httpx.Response) -> None:
+    def scenario_response_hook(self, response: Response) -> None:
         """Example scenario response hook.
 
         Args:
-            response (httpx.Response): The HTTP response.
+            response (Response): The HTTP response.
 
         Example:
-            >>> scenario_response_hook(httpx.Response(status_code=HTTPStatus.OK))
+            >>> scenario_response_hook(Response(status_code=HTTPStatus.OK))
         """
         print(f"Scenario response hook: {response.status_code}")

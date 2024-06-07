@@ -1,12 +1,12 @@
 # src/beaver_routes/core/base_route.py
 
-import httpx
 
 from beaver_routes.core.hook import Hook
 from beaver_routes.core.hook_manager import HookManager
 from beaver_routes.core.http_methods import DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 from beaver_routes.core.meta import Meta
 from beaver_routes.core.request_handler import RequestHandler
+from beaver_routes.core.response import Response
 from beaver_routes.core.scenario_manager import ScenarioManager
 
 
@@ -45,41 +45,41 @@ class BaseRoute:
             Customize this method for OPTIONS-specific meta and hooks.
         for_scenario(self, scenario_name: str) -> "BaseRoute":
             Set the scenario to be applied for the route.
-        _invoke(self, method: str) -> httpx.Response:
+        _invoke(self, method: str) -> Response:
             Internal method to handle synchronous HTTP requests.
-        _async_invoke(self, method: str) -> httpx.Response:
+        _async_invoke(self, method: str) -> Response:
             Internal method to handle asynchronous HTTP requests.
-        request(self, method: str) -> httpx.Response:
+        request(self, method: str) -> Response:
             Make a synchronous HTTP request with the specified method.
-        async_request(self, method: str) -> httpx.Response:
+        async_request(self, method: str) -> Response:
             Make an asynchronous HTTP request with the specified method.
-        get(self) -> httpx.Response:
+        get(self) -> Response:
             Make a synchronous GET request.
-        async_get(self) -> httpx.Response:
+        async_get(self) -> Response:
             Make an asynchronous GET request.
-        post(self) -> httpx.Response:
+        post(self) -> Response:
             Make a synchronous POST request.
-        async_post(self) -> httpx.Response:
+        async_post(self) -> Response:
             Make an asynchronous POST request.
-        put(self) -> httpx.Response:
+        put(self) -> Response:
             Make a synchronous PUT request.
-        async_put(self) -> httpx.Response:
+        async_put(self) -> Response:
             Make an asynchronous PUT request.
-        delete(self) -> httpx.Response:
+        delete(self) -> Response:
             Make a synchronous DELETE request.
-        async_delete(self) -> httpx.Response:
+        async_delete(self) -> Response:
             Make an asynchronous DELETE request.
-        patch(self) -> httpx.Response:
+        patch(self) -> Response:
             Make a synchronous PATCH request.
-        async_patch(self) -> httpx.Response:
+        async_patch(self) -> Response:
             Make an asynchronous PATCH request.
-        head(self) -> httpx.Response:
+        head(self) -> Response:
             Make a synchronous HEAD request.
-        async_head(self) -> httpx.Response:
+        async_head(self) -> Response:
             Make an asynchronous HEAD request.
-        options(self) -> httpx.Response:
+        options(self) -> Response:
             Make a synchronous OPTIONS request.
-        async_options(self) -> httpx.Response:
+        async_options(self) -> Response:
             Make an asynchronous OPTIONS request.
     """
 
@@ -181,14 +181,14 @@ class BaseRoute:
         self.scenario = scenario_name
         return self
 
-    def _invoke(self, method: str) -> httpx.Response:
+    def _invoke(self, method: str) -> Response:
         """Internal method to handle synchronous HTTP requests.
 
         Args:
             method (str): The HTTP method (e.g., "GET", "POST").
 
         Returns:
-            httpx.Response: The HTTP response.
+            Response: The HTTP response.
         """
         route_meta = self.meta.copy()
         route_hooks = Hook()
@@ -213,20 +213,22 @@ class BaseRoute:
         except Exception as e:
             raise RuntimeError(f"Failed to prepare httpx arguments: {e}")
 
-        response = self.request_handler.sync_request(method, url, **httpx_args)
+        _response = self.request_handler.sync_request(method, url, **httpx_args)
+
+        response = Response(_response)
 
         self.hook_manager.apply_hooks(method_hooks, "response", response)
 
         return response
 
-    async def _async_invoke(self, method: str) -> httpx.Response:
+    async def _async_invoke(self, method: str) -> Response:
         """Internal method to handle asynchronous HTTP requests.
 
         Args:
             method (str): The HTTP method (e.g., "GET", "POST").
 
         Returns:
-            httpx.Response: The HTTP response.
+            Response: The HTTP response.
         """
         route_meta = self.meta.copy()
         route_hooks = Hook()
@@ -251,117 +253,119 @@ class BaseRoute:
         except Exception as e:
             raise RuntimeError(f"Failed to prepare httpx arguments: {e}")
 
-        response = await self.request_handler.async_request(method, url, **httpx_args)
+        _response = await self.request_handler.async_request(method, url, **httpx_args)
+
+        response = Response(_response)
 
         self.hook_manager.apply_hooks(method_hooks, "response", response)
 
         return response
 
-    def request(self, method: str) -> httpx.Response:
+    def request(self, method: str) -> Response:
         """Make a synchronous HTTP request with the specified method.
 
         Args:
             method (str): The HTTP method (e.g., "GET", "POST").
 
         Returns:
-            httpx.Response: The HTTP response.
+            Response: The HTTP response.
         """
         return self._invoke(method)
 
-    async def async_request(self, method: str) -> httpx.Response:
+    async def async_request(self, method: str) -> Response:
         """Make an asynchronous HTTP request with the specified method.
 
         Args:
             method (str): The HTTP method (e.g., "GET", "POST").
 
         Returns:
-            httpx.Response: The HTTP response.
+            Response: The HTTP response.
         """
         return await self._async_invoke(method)
 
-    def get(self) -> httpx.Response:
+    def get(self) -> Response:
         """Make a synchronous GET request.
 
         Returns:
-            httpx.Response: The HTTP response.
+            Response: The HTTP response.
 
         Example:
             >>> route = GetUsersRoute()
             >>> response = route.get()
-            >>> print(response.json())
+            >>> print(response.json_content)
         """
         return self.request(GET)
 
-    async def async_get(self) -> httpx.Response:
+    async def async_get(self) -> Response:
         """Make an asynchronous GET request.
 
         Returns:
-            httpx.Response: The HTTP response.
+            Response: The HTTP response.
 
         Example:
             >>> route = GetUsersRoute()
             >>> response = await route.async_get()
-            >>> print(response.json())
+            >>> print(response.json_content)
         """
         return await self.async_request(GET)
 
-    def post(self) -> httpx.Response:
+    def post(self) -> Response:
         """Make a synchronous POST request.
 
         Returns:
-            httpx.Response: The HTTP response.
+            Response: The HTTP response.
 
         Example:
             >>> route = CreateUserRoute()
             >>> response = route.post()
-            >>> print(response.json())
+            >>> print(response.json_content)
         """
         return self.request(POST)
 
-    async def async_post(self) -> httpx.Response:
+    async def async_post(self) -> Response:
         """Make an asynchronous POST request.
 
         Returns:
-            httpx.Response: The HTTP response.
+            Response: The HTTP response.
 
         Example:
             >>> route = CreateUserRoute()
             >>> response = await route.async_post()
-            >>> print(response.json())
+            >>> print(response.json_content)
         """
         return await self.async_request(POST)
 
-    def put(self) -> httpx.Response:
+    def put(self) -> Response:
         """Make a synchronous PUT request.
 
         Returns:
-            httpx.Response: The HTTP response.
+            Response: The HTTP response.
 
         Example:
             >>> route = UpdateUserRoute(user_id=2)
             >>> response = route.put()
-            >>> print(response.json())
+            >>> print(response.json_content)
         """
         return self.request(PUT)
 
-    async def async_put(self) -> httpx.Response:
+    async def async_put(self) -> Response:
         """Make an asynchronous PUT request.
 
         Returns:
-            httpx.Response: The HTTP response.
+            Response: The HTTP response.
 
         Example:
             >>> route = UpdateUserRoute(user_id=2)
             >>> response = await route.async_put()
-            >>> print(response.json())
+            >>> print(response.json_content)
         """
         return await self.async_request(PUT)
 
-    def delete(self) -> httpx.Response:
+    def delete(self) -> Response:
         """Make a synchronous DELETE request.
 
         Returns:
-            httpx.Response: The HTTP response.
+            Response: The HTTP response.
 
         Example:
             >>> route = DeleteUserRoute(user_id=2)
@@ -370,11 +374,11 @@ class BaseRoute:
         """
         return self.request(DELETE)
 
-    async def async_delete(self) -> httpx.Response:
+    async def async_delete(self) -> Response:
         """Make an asynchronous DELETE request.
 
         Returns:
-            httpx.Response: The HTTP response.
+            Response: The HTTP response.
 
         Example:
             >>> route = DeleteUserRoute(user_id=2)
@@ -383,37 +387,37 @@ class BaseRoute:
         """
         return await self.async_request(DELETE)
 
-    def patch(self) -> httpx.Response:
+    def patch(self) -> Response:
         """Make a synchronous PATCH request.
 
         Returns:
-            httpx.Response: The HTTP response.
+            Response: The HTTP response.
 
         Example:
             >>> route = PatchUserRoute(user_id=2)
             >>> response = route.patch()
-            >>> print(response.json())
+            >>> print(response.json_content)
         """
         return self.request(PATCH)
 
-    async def async_patch(self) -> httpx.Response:
+    async def async_patch(self) -> Response:
         """Make an asynchronous PATCH request.
 
         Returns:
-            httpx.Response: The HTTP response.
+            Response: The HTTP response.
 
         Example:
             >>> route = PatchUserRoute(user_id=2)
             >>> response = await route.async_patch()
-            >>> print(response.json())
+            >>> print(response.json_content)
         """
         return await self.async_request(PATCH)
 
-    def head(self) -> httpx.Response:
+    def head(self) -> Response:
         """Make a synchronous HEAD request.
 
         Returns:
-            httpx.Response: The HTTP response.
+            Response: The HTTP response.
 
         Example:
             >>> route = HeadUserRoute(user_id=2)
@@ -422,11 +426,11 @@ class BaseRoute:
         """
         return self.request(HEAD)
 
-    async def async_head(self) -> httpx.Response:
+    async def async_head(self) -> Response:
         """Make an asynchronous HEAD request.
 
         Returns:
-            httpx.Response: The HTTP response.
+            Response: The HTTP response.
 
         Example:
             >>> route = HeadUserRoute(user_id=2)
@@ -435,11 +439,11 @@ class BaseRoute:
         """
         return await self.async_request(HEAD)
 
-    def options(self) -> httpx.Response:
+    def options(self) -> Response:
         """Make a synchronous OPTIONS request.
 
         Returns:
-            httpx.Response: The HTTP response.
+            Response: The HTTP response.
 
         Example:
             >>> route = OptionsUserRoute(user_id=2)
@@ -448,11 +452,11 @@ class BaseRoute:
         """
         return self.request(OPTIONS)
 
-    async def async_options(self) -> httpx.Response:
+    async def async_options(self) -> Response:
         """Make an asynchronous OPTIONS request.
 
         Returns:
-            httpx.Response: The HTTP response.
+            Response: The HTTP response.
 
         Example:
             >>> route = OptionsUserRoute(user_id=2)

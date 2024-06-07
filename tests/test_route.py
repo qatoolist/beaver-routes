@@ -7,6 +7,7 @@ import pytest
 
 from beaver_routes.core.hook import Hook
 from beaver_routes.core.meta import Meta
+from beaver_routes.core.response import Response
 from beaver_routes.exceptions.exceptions import MetaError
 from tests.custom_route import CustomRoute
 
@@ -91,6 +92,8 @@ class TestBaseRoute:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = route.get()
         assert response.status_code == HTTPStatus.OK
+        assert isinstance(response, Response)
+        assert response.text == '{"key": "value"}'
 
     def test_sync_post(self) -> None:
         """Test synchronous POST request.
@@ -103,6 +106,8 @@ class TestBaseRoute:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = route.post()
         assert response.status_code == HTTPStatus.OK
+        assert isinstance(response, Response)
+        assert response.text == '{"key": "value"}'
 
     def test_sync_put(self) -> None:
         """Test synchronous PUT request.
@@ -115,6 +120,8 @@ class TestBaseRoute:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = route.put()
         assert response.status_code == HTTPStatus.OK
+        assert isinstance(response, Response)
+        assert response.text == '{"key": "value"}'
 
     def test_sync_delete(self) -> None:
         """Test synchronous DELETE request.
@@ -127,6 +134,8 @@ class TestBaseRoute:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = route.delete()
         assert response.status_code == HTTPStatus.OK
+        assert isinstance(response, Response)
+        assert response.text == '{"key": "value"}'
 
     def test_sync_patch(self) -> None:
         """Test synchronous PATCH request.
@@ -139,6 +148,8 @@ class TestBaseRoute:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = route.patch()
         assert response.status_code == HTTPStatus.OK
+        assert isinstance(response, Response)
+        assert response.text == '{"key": "value"}'
 
     def test_sync_head(self) -> None:
         """Test synchronous HEAD request.
@@ -151,6 +162,8 @@ class TestBaseRoute:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = route.head()
         assert response.status_code == HTTPStatus.OK
+        assert isinstance(response, Response)
+        assert response.text == '{"key": "value"}'
 
     def test_sync_options(self) -> None:
         """Test synchronous OPTIONS request.
@@ -163,6 +176,8 @@ class TestBaseRoute:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = route.options()
         assert response.status_code == HTTPStatus.OK
+        assert isinstance(response, Response)
+        assert response.text == '{"key": "value"}'
 
     @pytest.mark.asyncio  # type: ignore
     async def test_async_get(self) -> None:
@@ -176,6 +191,8 @@ class TestBaseRoute:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = await route.async_get()
         assert response.status_code == HTTPStatus.OK
+        assert isinstance(response, Response)
+        assert response.text == '{"key": "value"}'
 
     @pytest.mark.asyncio  # type: ignore
     async def test_async_post(self) -> None:

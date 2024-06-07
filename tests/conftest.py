@@ -4,6 +4,8 @@ from typing import Any
 import httpx
 import pytest
 
+from beaver_routes.core.response import Response
+
 
 @pytest.fixture  # type: ignore
 def mock_httpx_client(monkeypatch: Any) -> None:
@@ -31,10 +33,18 @@ def mock_httpx_client(monkeypatch: Any) -> None:
         """
 
         def __init__(
-            self, status_code: int = HTTPStatus.OK, json_data: Any = None
+            self,
+            status_code: int = HTTPStatus.OK,
+            json_data: Any = None,
+            content: bytes = b"",
+            text: str = '{"key": "value"}',
+            cookies: dict[Any, Any] | None = {"session_id": "abc123"},
         ) -> None:
             self.status_code = status_code
             self._json_data = json_data or {}
+            self.content = content
+            self.text = text
+            self.cookies = cookies
 
         def json(self) -> Any:
             """Return the JSON data of the mock response.
@@ -80,3 +90,23 @@ def mock_httpx_client(monkeypatch: Any) -> None:
 
     monkeypatch.setattr(httpx.AsyncClient, "request", mock_async_request)
     monkeypatch.setattr(httpx.Client, "request", mock_request)
+
+
+@pytest.fixture  # type: ignore
+def httpx_response() -> httpx.Response:
+    """Fixture for creating a mock HTTPX response."""
+    response = httpx.Response(
+        status_code=200,
+        headers={"content-type": "application/json"},
+        content=b'{"key": "value"}',
+        request=httpx.Request("GET", "https://example.com"),
+    )
+    # Manually set cookies if needed
+    response.cookies["session_id"] = "abc123"
+    return response
+
+
+@pytest.fixture  # type: ignore
+def response(httpx_response: Any) -> Response:
+    """Fixture for creating a beaver-routes Response."""
+    return Response(httpx_response)
