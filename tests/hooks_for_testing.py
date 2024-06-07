@@ -1,7 +1,6 @@
+import httpx
 
 from beaver_routes.core.meta import Meta
-from beaver_routes.core.hook import Hook
-import httpx
 
 
 async def route_request_hook(method: str, url: str, meta: Meta) -> None:
@@ -29,4 +28,3 @@ async def method_response_hook(response: httpx.Response) -> None:
 
 async def scenario_response_hook(response: httpx.Response) -> None:
     print(f"Scenario response hook: {response.status_code}")
-
