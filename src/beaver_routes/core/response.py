@@ -1,5 +1,6 @@
 from typing import Any
 
+
 class Response:
     """
     A class representing an HTTP response within the beaver-routes DSL.
@@ -56,7 +57,7 @@ class Response:
         Returns:
             str: The text content of the response.
         """
-        return self._response.text
+        return str(self._response.text)
 
     @property
     def content(self) -> bytes:
@@ -66,7 +67,7 @@ class Response:
         Returns:
             bytes: The byte content of the response.
         """
-        return self._response.content
+        return bytes(self._response.content)
 
     @property
     def status_code(self) -> int:
@@ -76,7 +77,7 @@ class Response:
         Returns:
             int: The HTTP status code of the response.
         """
-        return self._response.status_code
+        return int(self._response.status_code)
 
     @property
     def headers(self) -> dict[str, str]:

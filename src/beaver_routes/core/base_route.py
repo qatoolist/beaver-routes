@@ -8,6 +8,7 @@ from beaver_routes.core.meta import Meta
 from beaver_routes.core.request_handler import RequestHandler
 from beaver_routes.core.response import Response
 from beaver_routes.core.scenario_manager import ScenarioManager
+from beaver_routes.core.validator_manager import ValidatorManager
 
 
 class BaseRoute:
@@ -83,7 +84,7 @@ class BaseRoute:
             Make an asynchronous OPTIONS request.
     """
 
-    def __init__(self, endpoint: str = "") -> None:
+    def __init__(self, endpoint: str = "", auto_validate: bool = False) -> None:
         """Initialize the BaseRoute with the given endpoint.
 
         Args:
@@ -96,6 +97,8 @@ class BaseRoute:
         self.request_handler = RequestHandler()
         self.hook_manager = HookManager()
         self.scenario_manager = ScenarioManager()
+        self.validator_manager = ValidatorManager()
+        self.validator_manager.enabled = auto_validate
 
     def __route__(self, meta: Meta, hooks: Hook) -> None:
         """Customize this method for route-specific meta and hooks.
@@ -218,7 +221,7 @@ class BaseRoute:
         response = Response(_response)
 
         self.hook_manager.apply_hooks(method_hooks, "response", response)
-
+        self.validator_manager.apply_validators(response)
         return response
 
     async def _async_invoke(self, method: str) -> Response:
@@ -258,7 +261,7 @@ class BaseRoute:
         response = Response(_response)
 
         self.hook_manager.apply_hooks(method_hooks, "response", response)
-
+        self.validator_manager.apply_validators(response)
         return response
 
     def request(self, method: str) -> Response:

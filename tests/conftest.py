@@ -1,5 +1,6 @@
 from http import HTTPStatus
 from typing import Any
+from unittest.mock import Mock
 
 import httpx
 import pytest
@@ -110,3 +111,16 @@ def httpx_response() -> httpx.Response:
 def response(httpx_response: Any) -> Response:
     """Fixture for creating a beaver-routes Response."""
     return Response(httpx_response)
+
+
+@pytest.fixture  # type: ignore
+def mock_response():
+    mock_resp = Mock()
+    mock_resp.status_code = 200
+    mock_resp.headers = {"Content-Type": "application/json"}
+    mock_resp.cookies = {"session_id": "abc123"}
+    mock_resp.url = "https://example.com"
+    mock_resp.content = b"response content"
+    mock_resp.text = "response content"
+    mock_resp.json.return_value = {"key": "value"}
+    return mock_resp

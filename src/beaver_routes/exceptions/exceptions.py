@@ -76,3 +76,44 @@ class InvalidHttpxArgumentsError(HttpxArgsHandlerError):
     """
 
     pass
+
+
+class ValidationError(Exception):
+    """Raised when a validation error occurs.
+
+    The ValidationError exception is used to indicate that a validation
+    check has failed. This can occur at different levels within the
+    application, such as route level, method level, or scenario level.
+
+    Attributes:
+        message (str): Human-readable message describing the validation error.
+        errors (list[str] | None): Optional list of errors providing more detailed information.
+
+    Args:
+        message (str): Human-readable message describing the validation error.
+        errors (list[str] | None, optional): Optional list of errors providing more detailed information.
+
+    Example:
+        >>> raise ValidationError("Invalid response structure", errors=["Missing field 'id'", "Invalid value for 'status'"])
+    """
+
+    def __init__(self, message: str, errors: list[str] | None = None) -> None:
+        """Initialize ValidationError with a message and optional list of errors.
+
+        Args:
+            message (str): Human-readable message describing the validation error.
+            errors (list[str] | None, optional): Optional list of errors providing more detailed information.
+        """
+        super().__init__(message)
+        self.message = message
+        self.errors = errors
+
+    def __str__(self) -> str:
+        """Return a string representation of the validation error.
+
+        Returns:
+            str: String representation of the validation error.
+        """
+        if self.errors:
+            return f"{self.message}: {', '.join(self.errors)}"
+        return self.message
