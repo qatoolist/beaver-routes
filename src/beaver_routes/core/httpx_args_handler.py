@@ -20,6 +20,11 @@ class HttpxArgsHandler:
                 return None
             return value
 
+        def box_to_dict_or_value(value: Any) -> Any:
+            if isinstance(value, Box):
+                return value.to_dict()
+            return value
+
         try:
             args = {
                 "params": empty_to_none(
@@ -45,27 +50,16 @@ class HttpxArgsHandler:
                     if meta._attributes.extensions
                     else None
                 ),
+                "content": box_to_dict_or_value(meta._attributes.content),
             }
 
             if method in {"POST", "PUT", "PATCH"}:
                 args.update(
                     {
-                        "content": meta._attributes.content,
-                        "data": empty_to_none(
-                            meta._attributes.data.to_dict()
-                            if isinstance(meta._attributes.data, Box)
-                            else meta._attributes.data
-                        ),
-                        "files": empty_to_none(
-                            meta._attributes.files.to_dict()
-                            if isinstance(meta._attributes.files, Box)
-                            else meta._attributes.files
-                        ),
-                        "json": empty_to_none(
-                            meta._attributes.json.to_dict()
-                            if isinstance(meta._attributes.json, Box)
-                            else meta._attributes.json
-                        ),
+                        "content": box_to_dict_or_value(meta._attributes.content),
+                        "data": box_to_dict_or_value(meta._attributes.data),
+                        "files": box_to_dict_or_value(meta._attributes.files),
+                        "json": box_to_dict_or_value(meta._attributes.json),
                     }
                 )
 
