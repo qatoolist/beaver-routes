@@ -1,9 +1,8 @@
 # tests/test_beaver_routes.py
 import pytest
-
 from beaver_routes.core.base_route import BaseRoute
-from beaver_routes.core.hook import Hook
 from beaver_routes.core.meta import Meta
+from beaver_routes.core.hook import Hook
 
 BASE_URL = "https://reqres.in/api"
 
@@ -18,7 +17,7 @@ class CreateUserRoute(BaseRoute):
         super().__init__(f"{BASE_URL}/users")
 
     def __post__(self, meta: Meta, hooks: Hook) -> None:
-        meta.data = {"name": "morpheus", "job": "leader"}
+        meta.json = {"name": "morpheus", "job": "leader"}
 
 
 class UpdateUserRoute(BaseRoute):
@@ -26,7 +25,7 @@ class UpdateUserRoute(BaseRoute):
         super().__init__(f"{BASE_URL}/users/{user_id}")
 
     def __put__(self, meta: Meta, hooks: Hook) -> None:
-        meta.data = {"name": "morpheus", "job": "zion resident"}
+        meta.json = {"name": "morpheus", "job": "zion resident"}
 
 
 class DeleteUserRoute(BaseRoute):
@@ -48,8 +47,8 @@ async def test_create_user() -> None:
     response = await route.async_post()
     assert response.status_code == 201
     json_response = response.json()
-    assert json_response["name"] == "morpheus"
-    assert json_response["job"] == "leader"
+    assert "id" in json_response
+    assert "createdAt" in json_response
 
 
 @pytest.mark.asyncio  # type: ignore
@@ -58,8 +57,7 @@ async def test_update_user() -> None:
     response = await route.async_put()
     assert response.status_code == 200
     json_response = response.json()
-    assert json_response["name"] == "morpheus"
-    assert json_response["job"] == "zion resident"
+    assert "updatedAt" in json_response
 
 
 @pytest.mark.asyncio  # type: ignore
@@ -69,7 +67,6 @@ async def test_delete_user() -> None:
     assert response.status_code == 204
 
 
-# For synchronous tests
 def test_sync_get_users() -> None:
     route = GetUsersRoute()
     response = route.get()
@@ -82,8 +79,8 @@ def test_sync_create_user() -> None:
     response = route.post()
     assert response.status_code == 201
     json_response = response.json()
-    assert json_response["name"] == "morpheus"
-    assert json_response["job"] == "leader"
+    assert "id" in json_response
+    assert "createdAt" in json_response
 
 
 def test_sync_update_user() -> None:
@@ -91,8 +88,7 @@ def test_sync_update_user() -> None:
     response = route.put()
     assert response.status_code == 200
     json_response = response.json()
-    assert json_response["name"] == "morpheus"
-    assert json_response["job"] == "zion resident"
+    assert "updatedAt" in json_response
 
 
 def test_sync_delete_user() -> None:

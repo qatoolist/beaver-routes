@@ -43,6 +43,9 @@ def test_to_httpx_args_with_post() -> None:
     )
     meta.url = "http://example.com"
     args = HttpxArgsHandler.convert(meta, "POST")
+    print("================")
+    print(args)
+    print("================")
     assert args["params"] == {"q": "search1"}
     assert args["headers"] == {"Authorization": "Bearer token1"}
     assert args["data"] == {"key": "value"}
