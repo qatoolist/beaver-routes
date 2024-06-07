@@ -3,8 +3,9 @@ pytest-cov
 mypy
 flake8
 black
-requests
+httpx
 aiohttp
 tenacity
 python-box
 pytest-asyncio
+pytest-xdist

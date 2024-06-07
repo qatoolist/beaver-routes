@@ -4,6 +4,7 @@ import httpx
 
 from beaver_routes.core.hook import Hook
 from beaver_routes.core.hook_manager import HookManager
+from beaver_routes.core.http_methods import DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 from beaver_routes.core.meta import Meta
 from beaver_routes.core.request_handler import RequestHandler
 from beaver_routes.core.scenario_manager import ScenarioManager
@@ -36,6 +37,12 @@ class BaseRoute:
             Customize this method for PUT-specific meta and hooks.
         __delete__(self, meta: Meta, hooks: Hook) -> None:
             Customize this method for DELETE-specific meta and hooks.
+        __patch__(self, meta: Meta, hooks: Hook) -> None:
+            Customize this method for PATCH-specific meta and hooks.
+        __head__(self, meta: Meta, hooks: Hook) -> None:
+            Customize this method for HEAD-specific meta and hooks.
+        __options__(self, meta: Meta, hooks: Hook) -> None:
+            Customize this method for OPTIONS-specific meta and hooks.
         for_scenario(self, scenario_name: str) -> "BaseRoute":
             Set the scenario to be applied for the route.
         _invoke(self, method: str) -> httpx.Response:
@@ -62,6 +69,18 @@ class BaseRoute:
             Make a synchronous DELETE request.
         async_delete(self) -> httpx.Response:
             Make an asynchronous DELETE request.
+        patch(self) -> httpx.Response:
+            Make a synchronous PATCH request.
+        async_patch(self) -> httpx.Response:
+            Make an asynchronous PATCH request.
+        head(self) -> httpx.Response:
+            Make a synchronous HEAD request.
+        async_head(self) -> httpx.Response:
+            Make an asynchronous HEAD request.
+        options(self) -> httpx.Response:
+            Make a synchronous OPTIONS request.
+        async_options(self) -> httpx.Response:
+            Make an asynchronous OPTIONS request.
     """
 
     def __init__(self, endpoint: str = "") -> None:
@@ -124,15 +143,30 @@ class BaseRoute:
         raise NotImplementedError("DELETE method not implemented.")
 
     def __patch__(self, meta: Meta, hooks: Hook) -> None:
-        """Customize this method for PATCH-specific meta and hooks."""
+        """Customize this method for PATCH-specific meta and hooks.
+
+        Args:
+            meta (Meta): The metadata for the PATCH request.
+            hooks (Hook): The hooks for the PATCH request.
+        """
         raise NotImplementedError("PATCH method not implemented.")
 
     def __head__(self, meta: Meta, hooks: Hook) -> None:
-        """Customize this method for HEAD-specific meta and hooks."""
+        """Customize this method for HEAD-specific meta and hooks.
+
+        Args:
+            meta (Meta): The metadata for the HEAD request.
+            hooks (Hook): The hooks for the HEAD request.
+        """
         raise NotImplementedError("HEAD method not implemented.")
 
     def __options__(self, meta: Meta, hooks: Hook) -> None:
-        """Customize this method for OPTIONS-specific meta and hooks."""
+        """Customize this method for OPTIONS-specific meta and hooks.
+
+        Args:
+            meta (Meta): The metadata for the OPTIONS request.
+            hooks (Hook): The hooks for the OPTIONS request.
+        """
         raise NotImplementedError("OPTIONS method not implemented.")
 
     def for_scenario(self, scenario_name: str) -> "BaseRoute":
@@ -256,7 +290,7 @@ class BaseRoute:
             >>> response = route.get()
             >>> print(response.json())
         """
-        return self.request("GET")
+        return self.request(GET)
 
     async def async_get(self) -> httpx.Response:
         """Make an asynchronous GET request.
@@ -269,7 +303,7 @@ class BaseRoute:
             >>> response = await route.async_get()
             >>> print(response.json())
         """
-        return await self.async_request("GET")
+        return await self.async_request(GET)
 
     def post(self) -> httpx.Response:
         """Make a synchronous POST request.
@@ -282,7 +316,7 @@ class BaseRoute:
             >>> response = route.post()
             >>> print(response.json())
         """
-        return self.request("POST")
+        return self.request(POST)
 
     async def async_post(self) -> httpx.Response:
         """Make an asynchronous POST request.
@@ -295,7 +329,7 @@ class BaseRoute:
             >>> response = await route.async_post()
             >>> print(response.json())
         """
-        return await self.async_request("POST")
+        return await self.async_request(POST)
 
     def put(self) -> httpx.Response:
         """Make a synchronous PUT request.
@@ -308,7 +342,7 @@ class BaseRoute:
             >>> response = route.put()
             >>> print(response.json())
         """
-        return self.request("PUT")
+        return self.request(PUT)
 
     async def async_put(self) -> httpx.Response:
         """Make an asynchronous PUT request.
@@ -321,7 +355,7 @@ class BaseRoute:
             >>> response = await route.async_put()
             >>> print(response.json())
         """
-        return await self.async_request("PUT")
+        return await self.async_request(PUT)
 
     def delete(self) -> httpx.Response:
         """Make a synchronous DELETE request.
@@ -334,7 +368,7 @@ class BaseRoute:
             >>> response = route.delete()
             >>> print(response.status_code)
         """
-        return self.request("DELETE")
+        return self.request(DELETE)
 
     async def async_delete(self) -> httpx.Response:
         """Make an asynchronous DELETE request.
@@ -347,22 +381,82 @@ class BaseRoute:
             >>> response = await route.async_delete()
             >>> print(response.status_code)
         """
-        return await self.async_request("DELETE")
+        return await self.async_request(DELETE)
 
     def patch(self) -> httpx.Response:
-        return self.request("PATCH")
+        """Make a synchronous PATCH request.
+
+        Returns:
+            httpx.Response: The HTTP response.
+
+        Example:
+            >>> route = PatchUserRoute(user_id=2)
+            >>> response = route.patch()
+            >>> print(response.json())
+        """
+        return self.request(PATCH)
 
     async def async_patch(self) -> httpx.Response:
-        return await self.async_request("PATCH")
+        """Make an asynchronous PATCH request.
+
+        Returns:
+            httpx.Response: The HTTP response.
+
+        Example:
+            >>> route = PatchUserRoute(user_id=2)
+            >>> response = await route.async_patch()
+            >>> print(response.json())
+        """
+        return await self.async_request(PATCH)
 
     def head(self) -> httpx.Response:
-        return self.request("HEAD")
+        """Make a synchronous HEAD request.
+
+        Returns:
+            httpx.Response: The HTTP response.
+
+        Example:
+            >>> route = HeadUserRoute(user_id=2)
+            >>> response = route.head()
+            >>> print(response.status_code)
+        """
+        return self.request(HEAD)
 
     async def async_head(self) -> httpx.Response:
-        return await self.async_request("HEAD")
+        """Make an asynchronous HEAD request.
+
+        Returns:
+            httpx.Response: The HTTP response.
+
+        Example:
+            >>> route = HeadUserRoute(user_id=2)
+            >>> response = await route.async_head()
+            >>> print(response.status_code)
+        """
+        return await self.async_request(HEAD)
 
     def options(self) -> httpx.Response:
-        return self.request("OPTIONS")
+        """Make a synchronous OPTIONS request.
+
+        Returns:
+            httpx.Response: The HTTP response.
+
+        Example:
+            >>> route = OptionsUserRoute(user_id=2)
+            >>> response = route.options()
+            >>> print(response.status_code)
+        """
+        return self.request(OPTIONS)
 
     async def async_options(self) -> httpx.Response:
-        return await self.async_request("OPTIONS")
+        """Make an asynchronous OPTIONS request.
+
+        Returns:
+            httpx.Response: The HTTP response.
+
+        Example:
+            >>> route = OptionsUserRoute(user_id=2)
+            >>> response = await route.async_options()
+            >>> print(response.status_code)
+        """
+        return await self.async_request(OPTIONS)

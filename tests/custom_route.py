@@ -101,6 +101,51 @@ class CustomRoute(BaseRoute):
         hooks.add("response", self.method_response_hook)
         meta.params.delete_param = "delete_value"
 
+    def __patch__(self, meta: Meta, hooks: Hook) -> None:
+        """Customize the PATCH-specific metadata and hooks.
+
+        Args:
+            meta (Meta): The PATCH request metadata.
+            hooks (Hook): The PATCH request hooks.
+
+        Example:
+            >>> route = CustomRoute()
+            >>> route.__patch__(Meta(), Hook())
+        """
+        hooks.add("request", self.method_request_hook)
+        hooks.add("response", self.method_response_hook)
+        meta.params.patch_param = "patch_value"
+
+    def __head__(self, meta: Meta, hooks: Hook) -> None:
+        """Customize the HEAD-specific metadata and hooks.
+
+        Args:
+            meta (Meta): The HEAD request metadata.
+            hooks (Hook): The HEAD request hooks.
+
+        Example:
+            >>> route = CustomRoute()
+            >>> route.__head__(Meta(), Hook())
+        """
+        hooks.add("request", self.method_request_hook)
+        hooks.add("response", self.method_response_hook)
+        meta.params.head_param = "head_value"
+
+    def __options__(self, meta: Meta, hooks: Hook) -> None:
+        """Customize the OPTIONS-specific metadata and hooks.
+
+        Args:
+            meta (Meta): The OPTIONS request metadata.
+            hooks (Hook): The OPTIONS request hooks.
+
+        Example:
+            >>> route = CustomRoute()
+            >>> route.__options__(Meta(), Hook())
+        """
+        hooks.add("request", self.method_request_hook)
+        hooks.add("response", self.method_response_hook)
+        meta.params.options_param = "options_value"
+
     def scenario1(self, meta: Meta, hooks: Hook) -> None:
         """Define a scenario to customize metadata and hooks for testing.
 
@@ -116,7 +161,7 @@ class CustomRoute(BaseRoute):
         hooks.add("response", self.scenario_response_hook)
         meta.params.scenario_param = "scenario_value"
 
-    async def route_request_hook(self, method: str, url: str, meta: Meta) -> None:
+    def route_request_hook(self, method: str, url: str, meta: Meta) -> None:
         """Example route request hook.
 
         Args:
@@ -125,12 +170,12 @@ class CustomRoute(BaseRoute):
             meta (Meta): The request metadata.
 
         Example:
-            >>> await route_request_hook("GET", "http://example.com", Meta())
+            >>> route_request_hook("GET", "http://example.com", Meta())
         """
         print(f"Route request hook: {method} {url} {meta}")
         meta.params.route_hook = "route_hook_value"
 
-    async def method_request_hook(self, method: str, url: str, meta: Meta) -> None:
+    def method_request_hook(self, method: str, url: str, meta: Meta) -> None:
         """Example method request hook.
 
         Args:
@@ -139,12 +184,12 @@ class CustomRoute(BaseRoute):
             meta (Meta): The request metadata.
 
         Example:
-            >>> await method_request_hook("GET", "http://example.com", Meta())
+            >>> method_request_hook("GET", "http://example.com", Meta())
         """
         print(f"Method request hook: {method} {url} {meta}")
         meta.params.method_hook = "method_hook_value"
 
-    async def scenario_request_hook(self, method: str, url: str, meta: Meta) -> None:
+    def scenario_request_hook(self, method: str, url: str, meta: Meta) -> None:
         """Example scenario request hook.
 
         Args:
@@ -153,40 +198,40 @@ class CustomRoute(BaseRoute):
             meta (Meta): The request metadata.
 
         Example:
-            >>> await scenario_request_hook("GET", "http://example.com", Meta())
+            >>> scenario_request_hook("GET", "http://example.com", Meta())
         """
         print(f"Scenario request hook: {method} {url} {meta}")
         meta.params.scenario_hook = "scenario_hook_value"
 
-    async def route_response_hook(self, response: httpx.Response) -> None:
+    def route_response_hook(self, response: httpx.Response) -> None:
         """Example route response hook.
 
         Args:
             response (httpx.Response): The HTTP response.
 
         Example:
-            >>> await route_response_hook(httpx.Response(status_code=HTTPStatus.OK))
+            >>> route_response_hook(httpx.Response(status_code=HTTPStatus.OK))
         """
         print(f"Route response hook: {response.status_code}")
 
-    async def method_response_hook(self, response: httpx.Response) -> None:
+    def method_response_hook(self, response: httpx.Response) -> None:
         """Example method response hook.
 
         Args:
             response (httpx.Response): The HTTP response.
 
         Example:
-            >>> await method_response_hook(httpx.Response(status_code=HTTPStatus.OK))
+            >>> method_response_hook(httpx.Response(status_code=HTTPStatus.OK))
         """
         print(f"Method response hook: {response.status_code}")
 
-    async def scenario_response_hook(self, response: httpx.Response) -> None:
+    def scenario_response_hook(self, response: httpx.Response) -> None:
         """Example scenario response hook.
 
         Args:
             response (httpx.Response): The HTTP response.
 
         Example:
-            >>> await scenario_response_hook(httpx.Response(status_code=HTTPStatus.OK))
+            >>> scenario_response_hook(httpx.Response(status_code=HTTPStatus.OK))
         """
         print(f"Scenario response hook: {response.status_code}")

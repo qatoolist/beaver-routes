@@ -10,6 +10,9 @@ class ScenarioManager:
     This class provides static methods to apply scenarios and prepare metadata and hooks
     for HTTP methods. It is used to manage the specific logic for scenarios within routes.
 
+    Attributes:
+        method_map (dict[str, Callable[[Any, Meta, Hook], None]]): A dictionary mapping HTTP methods to their corresponding handler functions.
+
     Methods:
         apply_scenario(route: Any, scenario_name: str, method_meta: Meta, method_hooks: Hook) -> tuple[Meta, Hook]:
             Apply a scenario to the given method metadata and hooks.
@@ -26,6 +29,17 @@ class ScenarioManager:
         "HEAD": lambda route, meta, hooks: route.__head__(meta, hooks),
         "OPTIONS": lambda route, meta, hooks: route.__options__(meta, hooks),
     }
+    """
+    A dictionary mapping HTTP methods to their corresponding handler functions.
+
+    This dictionary maps HTTP method names (e.g., "GET", "POST") to functions that handle
+    the preparation of metadata and hooks for the specified method. Each entry in the
+    dictionary is a lambda function that takes the route, metadata, and hooks as arguments
+    and calls the appropriate method on the route.
+
+    Example:
+        >>> ScenarioManager.method_map["GET"](route_instance, meta_instance, hook_instance)
+    """
 
     @staticmethod
     def apply_scenario(
@@ -74,6 +88,9 @@ class ScenarioManager:
 
         Returns:
             tuple[Meta, Hook]: The prepared metadata and hooks for the method.
+
+        Raises:
+            ValueError: If the provided HTTP method is unsupported.
 
         Example:
             >>> class MyRoute:
