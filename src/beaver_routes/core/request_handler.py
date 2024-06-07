@@ -13,4 +13,3 @@ class RequestHandler:
     async def async_request(method: str, url: str, **kwargs: Any) -> httpx.Response:
         async with httpx.AsyncClient() as client:
             return await client.request(method=method, url=url, **kwargs)
-

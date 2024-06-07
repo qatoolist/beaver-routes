@@ -25,19 +25,19 @@ class BaseRoute:
 
     def __get__(self, meta: Meta, hooks: Hook) -> None:
         """Customize this method for GET-specific meta and hooks."""
-        pass
+        raise NotImplementedError("GET method not implemented.")
 
     def __post__(self, meta: Meta, hooks: Hook) -> None:
         """Customize this method for POST-specific meta and hooks."""
-        pass
+        raise NotImplementedError("POST method not implemented.")
 
     def __put__(self, meta: Meta, hooks: Hook) -> None:
         """Customize this method for PUT-specific meta and hooks."""
-        pass
+        raise NotImplementedError("PUT method not implemented.")
 
     def __delete__(self, meta: Meta, hooks: Hook) -> None:
         """Customize this method for DELETE-specific meta and hooks."""
-        pass
+        raise NotImplementedError("DELETE method not implemented.")
 
     def for_scenario(self, scenario_name: str) -> "BaseRoute":
         self.scenario = scenario_name

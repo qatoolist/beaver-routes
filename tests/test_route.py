@@ -1,88 +1,13 @@
-from __future__ import annotations
-
-from typing import Any
-
-import httpx
+# tests/test_route.py
 import pytest
 
-from beaver_routes.core.base_route import BaseRoute
 from beaver_routes.core.hook import Hook
 from beaver_routes.core.meta import Meta
 from beaver_routes.exceptions.exceptions import MetaError
 
-
-# Define hooks for testing
-async def route_request_hook(method: str, url: str, meta: Meta) -> None:
-    print(f"Route request hook: {method} {url} {meta}")
-    meta.params.route_hook = "route_hook_value"
+from .custom_route import CustomRoute
 
 
-async def method_request_hook(method: str, url: str, meta: Meta) -> None:
-    print(f"Method request hook: {method} {url} {meta}")
-    meta.params.method_hook = "method_hook_value"
-
-
-async def scenario_request_hook(method: str, url: str, meta: Meta) -> None:
-    print(f"Scenario request hook: {method} {url} {meta}")
-    meta.params.scenario_hook = "scenario_hook_value"
-
-
-async def route_response_hook(response: httpx.Response) -> None:
-    print(f"Route response hook: {response.status_code}")
-
-
-async def method_response_hook(response: httpx.Response) -> None:
-    print(f"Method response hook: {response.status_code}")
-
-
-async def scenario_response_hook(response: httpx.Response) -> None:
-    print(f"Scenario response hook: {response.status_code}")
-
-
-# CustomRoute for testing
-class CustomRoute(BaseRoute):
-    def __route__(self, meta: Meta, hooks: Hook) -> None:
-        hooks.add("request", route_request_hook)
-        hooks.add("response", route_response_hook)
-        meta.params.route_param = "route_value"
-
-    def __get__(self, meta: Meta, hooks: Hook) -> None:
-        hooks.add("request", method_request_hook)
-        hooks.add("response", method_response_hook)
-        meta.params.get_param = "get_value"
-
-    def scenario1(self, meta: Meta, hooks: Hook) -> None:
-        hooks.add("request", scenario_request_hook)
-        hooks.add("response", scenario_response_hook)
-        meta.params.scenario_param = "scenario_value"
-
-
-# Helper function to mock httpx.Client and httpx.AsyncClient
-@pytest.fixture  # type: ignore
-def mock_httpx_client(monkeypatch) -> None:
-    class MockResponse:
-        def __init__(self, status_code: int = 200, json_data: Any = None) -> None:
-            self.status_code = status_code
-            self._json_data = json_data or {}
-
-        def json(self) -> Any:
-            return self._json_data
-
-    async def mock_async_request(  # type: ignore
-        self, method: str, url: str, *, dummy: Any | None = None, **kwargs: Any
-    ) -> MockResponse:
-        return MockResponse()
-
-    def mock_request(  # type: ignore
-        self, method: str, url: str, *, dummy: Any | None = None, **kwargs: Any
-    ) -> MockResponse:
-        return MockResponse()
-
-    monkeypatch.setattr(httpx.AsyncClient, "request", mock_async_request)
-    monkeypatch.setattr(httpx.Client, "request", mock_request)
-
-
-# Test suite
 @pytest.mark.usefixtures("mock_httpx_client")
 class TestBaseRoute:
     @pytest.mark.asyncio  # type: ignore
@@ -115,26 +40,22 @@ class TestBaseRoute:
         with pytest.raises(RuntimeError, match="Failed to prepare httpx arguments"):
             await route.async_get()
 
-    @pytest.mark.asyncio  # type: ignore
-    async def test_sync_get(self) -> None:
+    def test_sync_get(self) -> None:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = route.get()
         assert response.status_code == 200
 
-    @pytest.mark.asyncio  # type: ignore
-    async def test_sync_post(self) -> None:
+    def test_sync_post(self) -> None:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = route.post()
         assert response.status_code == 200
 
-    @pytest.mark.asyncio  # type: ignore
-    async def test_sync_put(self) -> None:
+    def test_sync_put(self) -> None:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = route.put()
         assert response.status_code == 200
 
-    @pytest.mark.asyncio  # type: ignore
-    async def test_sync_delete(self) -> None:
+    def test_sync_delete(self) -> None:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = route.delete()
         assert response.status_code == 200
@@ -162,7 +83,3 @@ class TestBaseRoute:
         route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
         response = await route.async_delete()
         assert response.status_code == 200
-
-
-if __name__ == "__main__":
-    pytest.main()

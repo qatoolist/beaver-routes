@@ -1,3 +1,4 @@
+# tests/test_meta.py
 import pytest
 from box import Box
 
@@ -107,7 +108,3 @@ def test_remove_key() -> None:
     assert meta.json.a.z == "z"  # type: ignore
     assert meta.json.a.b.c == "d"  # type: ignore
     assert meta.json.a.b.e == "f"  # type: ignore
-
-
-if __name__ == "__main__":
-    pytest.main()

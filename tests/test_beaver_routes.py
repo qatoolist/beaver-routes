@@ -12,6 +12,10 @@ class GetUsersRoute(BaseRoute):
     def __init__(self) -> None:
         super().__init__(f"{BASE_URL}/users")
 
+    def __get__(self, meta: Meta, hooks: Hook) -> None:
+        # Custom GET-specific meta and hooks for this route
+        pass
+
 
 class CreateUserRoute(BaseRoute):
     def __init__(self) -> None:
@@ -32,6 +36,10 @@ class UpdateUserRoute(BaseRoute):
 class DeleteUserRoute(BaseRoute):
     def __init__(self, user_id: int) -> None:
         super().__init__(f"{BASE_URL}/users/{user_id}")
+
+    def __delete__(self, meta: Meta, hooks: Hook) -> None:
+        # Custom DELETE-specific meta and hooks for this route
+        pass
 
 
 @pytest.mark.asyncio  # type: ignore
