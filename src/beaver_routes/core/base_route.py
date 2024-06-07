@@ -89,8 +89,6 @@ class BaseRoute:
         except Exception as e:
             raise RuntimeError(f"Failed to prepare httpx arguments: {e}")
 
-        print(f"kwargs are {httpx_args}")
-
         response = self._request(method=method, url=url, **httpx_args)
 
         final_hooks.apply_hooks("response", response)
@@ -137,7 +135,6 @@ class BaseRoute:
         except Exception as e:
             raise RuntimeError(f"Failed to prepare httpx arguments: {e}")
 
-        print(f"async kwargs are {httpx_args}")
         response = await self._async_request(method=method, url=url, **httpx_args)
 
         final_hooks.apply_hooks("response", response)
