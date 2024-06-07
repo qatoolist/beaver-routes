@@ -1,8 +1,9 @@
 # tests/test_beaver_routes.py
 import pytest
+
 from beaver_routes.core.base_route import BaseRoute
-from beaver_routes.core.meta import Meta
 from beaver_routes.core.hook import Hook
+from beaver_routes.core.meta import Meta
 
 BASE_URL = "https://reqres.in/api"
 

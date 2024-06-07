@@ -62,20 +62,20 @@ class HttpxArgsHandler:
                 return value.to_dict()
             return value
 
-        if meta._attributes.json is not None:
+        if meta._attributes.json:
             args["json"] = box_to_dict_or_value(meta._attributes.json)
-        elif meta._attributes.data is not None:
+        elif meta._attributes.data:
             args["data"] = box_to_dict_or_value(meta._attributes.data)
-        elif meta._attributes.files is not None:
+        elif meta._attributes.files:
             args["files"] = box_to_dict_or_value(meta._attributes.files)
-        elif meta._attributes.content is not None:
+        elif meta._attributes.content:
             args["content"] = HttpxArgsHandler._box_to_string_or_bytes(
                 meta._attributes.content
             )
 
     @staticmethod
     def _add_content_arg(meta: Any, args: Dict[str, Any]) -> None:
-        if meta._attributes.content is not None:
+        if meta._attributes.content:
             args["content"] = HttpxArgsHandler._box_to_string_or_bytes(
                 meta._attributes.content
             )
