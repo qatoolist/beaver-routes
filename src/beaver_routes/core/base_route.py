@@ -37,15 +37,17 @@ class BaseRoute:
         self.scenario = scenario_name
         return self
 
-    def _request(self, method: str, url: str, **kwargs: Any) -> httpx.Response:
+    def _request(
+        self, method: str, url: str, *, dummy: Any | None = None, **kwargs: Any
+    ) -> httpx.Response:
         with httpx.Client() as client:
-            return client.request(method, url, **kwargs)
+            return client.request(method=method, url=url, **kwargs)
 
     async def _async_request(
-        self, method: str, url: str, **kwargs: Any
+        self, method: str, url: str, *, dummy: Any | None = None, **kwargs: Any
     ) -> httpx.Response:
         async with httpx.AsyncClient() as client:
-            return await client.request(method, url, **kwargs)
+            return await client.request(method=method, url=url, **kwargs)
 
     def _invoke(self, method: str) -> httpx.Response:
         route_meta = self.meta.copy()
@@ -87,7 +89,9 @@ class BaseRoute:
         except Exception as e:
             raise RuntimeError(f"Failed to prepare httpx arguments: {e}")
 
-        response = self._request(method, url, **httpx_args)
+        print(f"kwargs are {httpx_args}")
+
+        response = self._request(method=method, url=url, **httpx_args)
 
         final_hooks.apply_hooks("response", response)
 
@@ -133,7 +137,8 @@ class BaseRoute:
         except Exception as e:
             raise RuntimeError(f"Failed to prepare httpx arguments: {e}")
 
-        response = await self._async_request(method, url, **httpx_args)
+        print(f"async kwargs are {httpx_args}")
+        response = await self._async_request(method=method, url=url, **httpx_args)
 
         final_hooks.apply_hooks("response", response)
 

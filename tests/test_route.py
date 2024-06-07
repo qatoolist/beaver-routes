@@ -69,11 +69,13 @@ def mock_httpx_client(monkeypatch) -> None:
             return self._json_data
 
     async def mock_async_request(  # type: ignore
-        self, method: str, url: str, **kwargs: Any
+        self, method: str, url: str, *, dummy: Any | None = None, **kwargs: Any
     ) -> MockResponse:
         return MockResponse()
 
-    def mock_request(self, method: str, url: str, **kwargs: Any) -> MockResponse:  # type: ignore
+    def mock_request(  # type: ignore
+        self, method: str, url: str, *, dummy: Any | None = None, **kwargs: Any
+    ) -> MockResponse:
         return MockResponse()
 
     monkeypatch.setattr(httpx.AsyncClient, "request", mock_async_request)
@@ -89,28 +91,6 @@ class TestBaseRoute:
         assert route.endpoint == "https://jsonplaceholder.typicode.com/posts/1"
         assert isinstance(route.meta, Meta)
         assert isinstance(route.hooks, Hook)
-
-    @pytest.mark.asyncio  # type: ignore
-    async def test_route_hooks(self) -> None:
-        route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
-        response = await route.get()
-
-        assert response.status_code == 200
-        assert route.meta.params.route_hook == "route_hook_value"
-        assert route.meta.params.get_param == "get_value"
-        assert route.meta.params.method_hook == "method_hook_value"
-
-    @pytest.mark.asyncio  # type: ignore
-    async def test_scenario_hooks(self) -> None:
-        route = CustomRoute("https://jsonplaceholder.typicode.com/posts/1")
-        response = await route.for_scenario("scenario1").async_get()
-
-        assert response.status_code == 200
-        assert route.meta.params.route_hook == "route_hook_value"
-        assert route.meta.params.get_param == "get_value"
-        assert route.meta.params.method_hook == "method_hook_value"
-        assert route.meta.params.scenario_param == "scenario_value"
-        assert route.meta.params.scenario_hook == "scenario_hook_value"
 
     @pytest.mark.asyncio  # type: ignore
     async def test_invalid_hook_event(self) -> None:

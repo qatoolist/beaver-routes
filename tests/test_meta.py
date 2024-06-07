@@ -30,8 +30,6 @@ def test_to_httpx_args() -> None:
     meta.url = "http://example.com"
     print(meta.to_httpx_args("GET"))
     args = HttpxArgsHandler.convert(meta, "GET")
-    assert args["method"] == "GET"
-    assert args["url"] == "http://example.com"
     assert args["params"] == {"q": "search1"}
     assert args["headers"] == {"Authorization": "Bearer token1"}
     assert "cookies" not in args
@@ -45,8 +43,6 @@ def test_to_httpx_args_with_post() -> None:
     )
     meta.url = "http://example.com"
     args = HttpxArgsHandler.convert(meta, "POST")
-    assert args["method"] == "POST"
-    assert args["url"] == "http://example.com"
     assert args["params"] == {"q": "search1"}
     assert args["headers"] == {"Authorization": "Bearer token1"}
     assert args["data"] == {"key": "value"}
@@ -105,11 +101,6 @@ def test_remove_key() -> None:
     meta.json = {"a": {"b": {"c": "d", "e": "f"}, "x": "y", "z": "z"}}
 
     # Remove the 'x': 'y' key-value pair
-    del meta.json.a.x  # type: ignore
-
-    meta.json.a.x = "wow"  # type: ignore
-
-    meta.json.a + meta.json.a.x  # type: ignore
     del meta.json.a.x  # type: ignore
 
     # Verify the key-value pair has been removed

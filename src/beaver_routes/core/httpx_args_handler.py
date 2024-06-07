@@ -22,8 +22,6 @@ class HttpxArgsHandler:
 
         try:
             args = {
-                "method": method,
-                "url": meta.url,
                 "params": empty_to_none(
                     meta._attributes.params.to_dict()
                     if meta._attributes.params
